@@ -1,0 +1,160 @@
+<!doctype html>
+<html>
+<head>
+    <title>Marker PDF WebUI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: auto;
+        }
+        h1 {
+            width: fit-content;
+            margin: auto;
+            padding: 20pt;
+        }
+        form {
+            width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        select {
+            /* width: 100%; */
+            position: absolute;
+            right: 0;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        input[type="checkbox"] {
+            margin-bottom: 10px;
+            position: absolute;
+            right: 0;
+        }
+        input[type="text"] {
+            /* width: 100%; */
+            position: absolute;
+            right: 0;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .flex {
+            display: flex;
+            margin-bottom: 20pt;
+        }
+        #spinner {
+            font-size: 50pt;
+            color: #4CAF50;
+        }
+    </style>
+    
+    {% if not message %}
+    <style>#spinner{opacity: 0;}</style>
+    {% endif %}
+    
+</head>
+<body>
+    <h1>Marker PDF WebUI</h1>
+    <h1>
+        <i id="spinner" class="fa-solid fa-rotate fa-spin"></i>
+    </h1>
+    
+    <form method="post" enctype="multipart/form-data">
+    
+        <div class="flex">
+            <input type="file" name="file" accept=".pdf">
+        </div>
+
+        <div class="flex">
+            <label for="output_format">Output Format:</label>
+            <select name="output_format" id="output_format">
+                <option value="markdown">Markdown</option>
+                <option value="json">JSON</option>
+                <option value="html">HTML</option>
+            </select>
+        </div>
+        
+
+        <div class="flex">
+            <label for="paginate_output">Paginate Output:</label>
+            <input type="checkbox" name="paginate_output" id="paginate_output">
+        </div>
+        
+
+        <div class="flex">
+            <label for="disable_image_extraction">Disable Image Extraction:</label>
+            <input type="checkbox" name="disable_image_extraction" id="disable_image_extraction">
+        </div>
+        
+
+        <div class="flex">
+            <label for="page_range">Page Range:</label>
+            <input type="text" name="page_range" id="page_range" placeholder="0,5-10,20">
+        </div>
+
+        <div class="flex">
+            <label for="force_ocr">Force OCR:</label>
+            <input type="checkbox" name="force_ocr" id="force_ocr">
+        </div>
+
+        <div class="flex">
+            <label for="strip_existing_ocr">Strip Existing OCR:</label>
+            <input type="checkbox" name="strip_existing_ocr" id="strip_existing_ocr">
+        </div>
+
+        <div class="flex">
+            <label for="languages">Languages:</label>
+            <input type="text" name="languages" id="languages" placeholder="en,fr,de">
+        </div>
+
+        <div class="flex">
+            <label for="converter_cls">Converter Class:</label>
+            <select name="converter_cls" id="converter_cls">
+                <option value="marker.converters.pdf.PdfConverter">PdfConverter</option>
+                <option value="marker.converters.table.TableConverter">TableConverter</option>
+            </select>
+        </div>
+        <input type="submit" value="Upload">
+    </form>
+</body>
+
+
+{% if download_link %}
+    <script>
+        async function checkDownloadLink() {
+            const response = await fetch("{{ download_link }}");
+            
+            if (!response.ok) {
+                setTimeout(checkDownloadLink, 2000);
+                return;
+            }
+            document.getElementById("spinner").style.opacity=0;
+            const blob = await response.blob();
+            const urlObject = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = urlObject;
+            link.download = decodeURIComponent(response.headers.get('content-disposition').split('filename=')[1]);
+            link.click();
+            URL.revokeObjectURL(urlObject);
+        }
+
+        checkDownloadLink();
+    </script>
+{% endif %}
+
+
+</html>
