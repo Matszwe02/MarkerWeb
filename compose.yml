@@ -1,0 +1,20 @@
+services:
+  marker-pdf:
+    # image: datalab/maker:latest
+    container_name: marker-pdf
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    environment:
+        TORCH_DEVICE: "cuda"
+    volumes:
+        - ./app.log:/app/app.log
+      
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
